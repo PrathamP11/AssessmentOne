@@ -6,3 +6,10 @@ node_modules/
 dist/
 vite-dev.log
 vite-dev.err.log
+
+backend/.env
+backend/.venv/
+frontend/node_modules/
+frontend/dist/
+backend/hcp_crm.db
+*.db

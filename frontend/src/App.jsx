@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
   addUserMessage,
   receiveAgentResult,
+  receiveSaveResult,
   setAgentError,
-  setAgentPending
+  setAgentPending,
+  setSaveError
 } from "./features/crmSlice";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
@@ -14,21 +16,44 @@ function App() {
   const dispatch = useDispatch();
   const { formState, messages, status, toolEvents, error } = useSelector((state) => state.crm);
   const [draft, setDraft] = useState("");
+  const [voiceStatus, setVoiceStatus] = useState("idle");
+  const recognitionRef = useRef(null);
 
   const transcriptHistory = messages
     .filter((message) => message.variant !== "hint")
     .map((message) => ({ role: message.role, content: message.content }));
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const content = draft.trim();
+  const saveInteraction = async (updatedFormState) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/interactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          form_state: updatedFormState
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not save the interaction.");
+      }
+
+      const payload = await response.json();
+      dispatch(receiveSaveResult(payload));
+    } catch (saveError) {
+      dispatch(setSaveError(saveError.message || "Could not save the interaction."));
+    }
+  };
+
+  const sendAgentMessage = async (rawContent) => {
+    const content = rawContent.trim();
     if (!content || status === "loading") {
       return;
     }
 
     dispatch(addUserMessage(content));
     dispatch(setAgentPending());
-    setDraft("");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/agent/message`, {
@@ -49,6 +74,7 @@ function App() {
 
       const payload = await response.json();
       dispatch(receiveAgentResult(payload));
+      saveInteraction(payload.form_state);
     } catch (requestError) {
       dispatch(
         setAgentError(
@@ -59,6 +85,52 @@ function App() {
     }
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const content = draft.trim();
+    setDraft("");
+    await sendAgentMessage(content);
+  };
+
+  const handleVoiceSummary = () => {
+    const hasConsent = window.confirm(
+      "This will use your browser microphone to capture a voice note and send the transcript to the AI assistant. Do you consent?"
+    );
+
+    if (!hasConsent) {
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      dispatch(
+        setAgentError(
+          "Voice note capture is not supported in this browser. Please use Chrome or Edge, or type the note in chat."
+        )
+      );
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setVoiceStatus("listening");
+    recognition.onerror = () => {
+      setVoiceStatus("idle");
+      dispatch(setAgentError("Voice note capture failed. Please check microphone permissions and try again."));
+    };
+    recognition.onend = () => setVoiceStatus("idle");
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      sendAgentMessage(`Summarize this voice note and log the HCP interaction details: ${transcript}`);
+    };
+
+    recognition.start();
+  };
+
   return (
     <main className="page-shell">
       <section className="screen-card">
@@ -67,7 +139,11 @@ function App() {
         </header>
 
         <div className="screen-grid">
-          <InteractionPanel formState={formState} />
+          <InteractionPanel
+            formState={formState}
+            onVoiceSummary={handleVoiceSummary}
+            voiceStatus={voiceStatus}
+          />
           <ChatPanel
             draft={draft}
             error={error}
@@ -83,7 +159,7 @@ function App() {
   );
 }
 
-function InteractionPanel({ formState }) {
+function InteractionPanel({ formState, onVoiceSummary, voiceStatus }) {
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -150,8 +226,8 @@ function InteractionPanel({ formState }) {
           </div>
         </Field>
 
-        <button className="secondary-action" type="button">
-          ✣ Summarize from Voice Note (Requires Consent)
+        <button className="secondary-action" type="button" onClick={onVoiceSummary} disabled={voiceStatus === "listening"}>
+          ✣ {voiceStatus === "listening" ? "Listening..." : "Summarize from Voice Note (Requires Consent)"}
         </button>
 
         <section className="sub-card">

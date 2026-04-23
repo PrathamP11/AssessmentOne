@@ -49,3 +49,22 @@ class AgentResponse(BaseModel):
     assistant_message: str
     form_state: InteractionFormState
     tool_events: list[ToolEvent] = Field(default_factory=list)
+
+
+class SaveInteractionRequest(BaseModel):
+    form_state: InteractionFormState
+
+
+class SavedInteractionResponse(BaseModel):
+    id: int
+    message: str
+    form_state: InteractionFormState
+
+
+class InteractionListItem(BaseModel):
+    id: int
+    hcp_name: str
+    interaction_type: str
+    date: str
+    time: str
+    sentiment: Sentiment

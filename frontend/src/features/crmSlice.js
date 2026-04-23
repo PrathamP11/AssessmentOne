@@ -30,6 +30,8 @@ const initialState = {
   ],
   toolEvents: [],
   status: "idle",
+  saveStatus: "idle",
+  saveMessage: "",
   error: ""
 };
 
@@ -66,9 +68,29 @@ const crmSlice = createSlice({
         variant: "error",
         content: action.payload
       });
+    },
+    setSavePending(state) {
+      state.saveStatus = "loading";
+      state.saveMessage = "";
+    },
+    receiveSaveResult(state, action) {
+      state.saveStatus = "idle";
+      state.saveMessage = `Saved interaction #${action.payload.id}`;
+    },
+    setSaveError(state, action) {
+      state.saveStatus = "failed";
+      state.saveMessage = action.payload;
     }
   }
 });
 
-export const { addUserMessage, setAgentPending, receiveAgentResult, setAgentError } = crmSlice.actions;
+export const {
+  addUserMessage,
+  setAgentPending,
+  receiveAgentResult,
+  setAgentError,
+  setSavePending,
+  receiveSaveResult,
+  setSaveError
+} = crmSlice.actions;
 export default crmSlice.reducer;

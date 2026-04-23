@@ -5,8 +5,8 @@ This repository contains **Task 1** for the assignment: an **AI-first CRM HCP Lo
 - **Frontend:** React + Redux Toolkit
 - **Backend:** FastAPI
 - **AI Agent Framework:** LangGraph
-- **LLM Provider:** Groq (`gemma2-9b-it` by default)
-- **Database target:** Postgres/MySQL-ready domain model
+- **LLM Provider:** Groq (`llama-3.3-70b-versatile`)
+- **Database:** PostgreSQL by default, SQLAlchemy-compatible with MySQL
 - **Font:** Google Inter
 
 The solution follows the video instruction closely:
@@ -185,16 +185,21 @@ It returns:
 - assistant reply
 - tool events used during that turn
 
-### SQL-Ready Persistence
+### SQL Persistence
 
-The repository includes a SQLAlchemy model scaffold in [backend/app/models.py](/C:/All%20files/codex/backend/app/models.py) so the module is ready to persist interaction records into **Postgres or MySQL**.
+The repository includes SQLAlchemy models in `backend/app/models.py` and real persistence endpoints for interaction records.
 
 Current entities:
 
 - `InteractionRecord`
 - `SampleDistribution`
 
-This keeps the submission aligned with the assignment's required database direction while keeping the main demo focused on the AI logging workflow.
+Default database:
+
+- PostgreSQL
+- `DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/hcp_crm`
+
+The same SQLAlchemy model layer can be pointed to MySQL by changing `DATABASE_URL` and installing a MySQL driver such as `pymysql`.
 
 ## Environment Setup
 
@@ -208,17 +213,28 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Set your Groq API key in `.env`:
+Create a PostgreSQL database named `hcp_crm` before starting the backend:
+
+```bash
+psql -U postgres
+CREATE DATABASE hcp_crm;
+\q
+```
+
+Set your Groq API key and database URL in `.env`:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=gemma2-9b-it
+GROQ_MODEL=llama-3.3-70b-versatile
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/hcp_crm
 ```
+
+The assignment mentions `gemma2-9b-it`, but Groq has decommissioned that model. This project uses `llama-3.3-70b-versatile`, which the assignment also mentions as a Groq model to consider.
 
 Run the API:
 
 ```bash
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
 ### Frontend

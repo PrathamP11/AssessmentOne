@@ -6,3 +6,4 @@ langgraph==0.4.1
 langchain-core==0.3.56
 langchain-groq==0.3.2
 SQLAlchemy==2.0.40
+psycopg[binary]==3.2.7
