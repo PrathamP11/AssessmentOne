@@ -103,11 +103,12 @@ function App() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      dispatch(
-        setAgentError(
-          "Voice note capture is not supported in this browser. Please use Chrome or Edge, or type the note in chat."
-        )
+      const typedNote = window.prompt(
+        "Voice capture is not supported in this browser. Paste or type the voice note transcript here:"
       );
+      if (typedNote?.trim()) {
+        sendAgentMessage(`Summarize this voice note and log the HCP interaction details: ${typedNote}`);
+      }
       return;
     }
 
@@ -118,9 +119,15 @@ function App() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => setVoiceStatus("listening");
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
       setVoiceStatus("idle");
-      dispatch(setAgentError("Voice note capture failed. Please check microphone permissions and try again."));
+      const typedNote = window.prompt(
+        `Voice note capture failed (${event.error}). Paste or type the voice note transcript here instead:`
+      );
+      if (typedNote?.trim()) {
+        sendAgentMessage(`Summarize this voice note and log the HCP interaction details: ${typedNote}`);
+        return;
+      }
     };
     recognition.onend = () => setVoiceStatus("idle");
     recognition.onresult = (event) => {
@@ -324,7 +331,6 @@ function ChatPanel({ draft, error, messages, onDraftChange, onSubmit, status, to
         ))}
 
         {status === "loading" && <article className="message-bubble pending">Updating the form through LangGraph...</article>}
-        {error && <article className="error-copy">{error}</article>}
       </div>
 
       <form className="chat-input-row" onSubmit={onSubmit}>
