@@ -1,7 +1,7 @@
 :root {
   font-family: "Inter", sans-serif;
   color: #183153;
-  background: #ffffff;
+  background: #f3f4f6;
   line-height: 1.4;
   font-weight: 400;
 }
@@ -20,7 +20,7 @@ body {
   margin: 0;
   overflow: hidden;
   color: #102543;
-  background: #ffffff;
+  background: #f3f4f6;
 }
 
 button,
@@ -47,17 +47,17 @@ input[readonly] {
 
 .page-shell {
   height: 100vh;
-  padding: 8px 10px;
-  background: #ffffff;
+  padding: 8px 7px;
+  background: #f3f4f6;
 }
 
 .screen-card {
-  max-width: 1420px;
+  max-width: none;
   height: calc(100vh - 16px);
-  margin: 0 auto;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: #f3f4f6;
   overflow: hidden;
 }
 
@@ -90,6 +90,7 @@ input[readonly] {
   border: 1px solid #e1e6ef;
   border-radius: 8px;
   background: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 37, 67, 0.08);
   overflow: hidden;
 }
 
@@ -217,6 +218,9 @@ input[readonly] {
   padding: 7px 11px;
   font-weight: 600;
   font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .material-block p,
@@ -235,7 +239,7 @@ input[readonly] {
 .sentiment-option {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: #45556d;
   font-size: 14px;
 }
@@ -250,6 +254,53 @@ input[readonly] {
 .sentiment-option.active .dot {
   border-color: #1f7cff;
   box-shadow: inset 0 0 0 3px #1f7cff;
+}
+
+.sentiment-emoji {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.inline-icon {
+  display: block;
+  flex: 0 0 auto;
+  color: #5f6774;
+}
+
+.search-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.cube-icon {
+  width: 15px;
+  height: 15px;
+  color: #3f4650;
+}
+
+.textarea-with-icon {
+  position: relative;
+}
+
+.textarea-with-icon textarea {
+  padding-right: 34px;
+}
+
+.textarea-mic-icon {
+  position: absolute;
+  right: 12px;
+  bottom: 9px;
+  color: #555f6d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.textarea-mic-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .followup-strip ul,
@@ -268,6 +319,7 @@ input[readonly] {
 
 .chat-panel {
   background: #ffffff;
+  margin-right: 4vh;
 }
 
 .chat-feed {

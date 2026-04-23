@@ -124,12 +124,30 @@ function InteractionPanel({ formState }) {
         </Field>
 
         <Field label="Topics Discussed">
-          <textarea
-            value={formState.topics_discussed}
-            placeholder="Enter key discussion points..."
-            rows="4"
-            readOnly
-          />
+          <div className="textarea-with-icon">
+            <textarea
+              value={formState.topics_discussed}
+              placeholder="Enter key discussion points..."
+              rows="4"
+              readOnly
+            />
+            <span className="textarea-mic-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M8 9.5C9.1 9.5 10 8.6 10 7.5V3.5C10 2.4 9.1 1.5 8 1.5C6.9 1.5 6 2.4 6 3.5V7.5C6 8.6 6.9 9.5 8 9.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M4.4 7.2C4.4 9.2 6 10.8 8 10.8C10 10.8 11.6 9.2 11.6 7.2M8 10.8V14M6.4 14H9.6"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          </div>
         </Field>
 
         <button className="secondary-action" type="button">
@@ -146,7 +164,10 @@ function InteractionPanel({ formState }) {
           <div className="material-block">
             <div className="block-header">
               <h4>Materials Shared</h4>
-              <button type="button">⌕ Search/Add</button>
+              <button type="button">
+                <SearchIcon />
+                <span>Search/Add</span>
+              </button>
             </div>
             <p>{formState.materials_shared.length ? formState.materials_shared.join(", ") : "No materials added."}</p>
           </div>
@@ -154,7 +175,10 @@ function InteractionPanel({ formState }) {
           <div className="material-block">
             <div className="block-header">
               <h4>Samples Distributed</h4>
-              <button type="button">◫ Add Sample</button>
+              <button type="button">
+                <CubeIcon />
+                <span>Add Sample</span>
+              </button>
             </div>
             {formState.samples_distributed.length ? (
               <ul className="tag-list">
@@ -172,9 +196,9 @@ function InteractionPanel({ formState }) {
 
         <Field label="Observed/Inferred HCP Sentiment">
           <div className="sentiment-row">
-            <SentimentOption label="Positive" active={formState.sentiment === "positive"} />
-            <SentimentOption label="Neutral" active={formState.sentiment === "neutral"} />
-            <SentimentOption label="Negative" active={formState.sentiment === "negative"} />
+            <SentimentOption emoji="😊" label="Positive" active={formState.sentiment === "positive"} />
+            <SentimentOption emoji="😐" label="Neutral" active={formState.sentiment === "neutral"} />
+            <SentimentOption emoji="🙁" label="Negative" active={formState.sentiment === "negative"} />
           </div>
         </Field>
 
@@ -212,7 +236,7 @@ function ChatPanel({ draft, error, messages, onDraftChange, onSubmit, status, to
   return (
     <section className="panel chat-panel">
       <div className="panel-heading">
-        <h2>⊚ AI Assistant</h2>
+        <h2>🤖 AI Assistant</h2>
         <p>Log interaction via chat</p>
       </div>
 
@@ -262,12 +286,31 @@ function Field({ label, children }) {
   );
 }
 
-function SentimentOption({ active, label }) {
+function SentimentOption({ active, emoji, label }) {
   return (
     <div className={`sentiment-option ${active ? "active" : ""}`}>
       <span className="dot" />
+      <span className="sentiment-emoji" aria-hidden="true">{emoji}</span>
       <span>{label}</span>
     </div>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg className="inline-icon search-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10.1 10.1L13.2 13.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CubeIcon() {
+  return (
+    <svg className="inline-icon cube-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M9 1.8L15 5.2V12.6L9 16.2L3 12.6V5.2L9 1.8Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
+      <path d="M3 5.2L9 8.7L15 5.2M9 8.7V16.2" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
+    </svg>
   );
 }
 
