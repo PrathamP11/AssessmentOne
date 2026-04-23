@@ -27,7 +27,10 @@ The solution follows the video instruction closely:
 │   ├── app
 │   │   ├── agent.py
 │   │   ├── config.py
+│   │   ├── database.py
 │   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── repository.py
 │   │   ├── schemas.py
 │   │   ├── state.py
 │   │   └── tools.py
@@ -158,6 +161,7 @@ The React UI is intentionally aligned with the provided screenshot:
 - Light clinical CRM visual style
 - Inter font
 - AI-controlled form behavior
+- Voice-note summarization with consent and transcript fallback
 
 Redux stores:
 
@@ -165,6 +169,7 @@ Redux stores:
 - chat history
 - latest tool execution results
 - loading and error states
+- background save status
 
 ## Backend Notes
 
@@ -172,6 +177,8 @@ The FastAPI backend exposes:
 
 - `GET /health`
 - `POST /api/agent/message`
+- `POST /api/interactions`
+- `GET /api/interactions`
 
 The `POST` route accepts:
 
@@ -184,6 +191,22 @@ It returns:
 - updated form state
 - assistant reply
 - tool events used during that turn
+
+After a successful AI update, the frontend automatically saves the latest interaction state to PostgreSQL using `POST /api/interactions`. There is no visible manual save button because the submitted UI is intended to stay close to the assignment screenshot and remain AI-first.
+
+### Voice Note Flow
+
+The `Summarize from Voice Note (Requires Consent)` button requests user consent before attempting browser speech recognition.
+
+Flow:
+
+1. The user consents to microphone capture.
+2. The browser attempts speech-to-text.
+3. The transcript is sent to the same LangGraph agent flow.
+4. The AI extracts/summarizes details and updates the form.
+5. If browser speech recognition fails, the UI provides a transcript fallback prompt.
+
+The fallback still uses the same LangGraph and Groq backend path.
 
 ### SQL Persistence
 
@@ -229,6 +252,8 @@ GROQ_MODEL=llama-3.3-70b-versatile
 DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/hcp_crm
 ```
 
+If the PostgreSQL password contains special characters such as `@`, URL-encode them in `DATABASE_URL`. For example, `@` becomes `%40`.
+
 The assignment mentions `gemma2-9b-it`, but Groq has decommissioned that model. This project uses `llama-3.3-70b-versatile`, which the assignment also mentions as a Groq model to consider.
 
 Run the API:
@@ -261,11 +286,33 @@ Use these during the recording to prove all 5 tools:
 4. `I distributed 2 starter packs of OncoBoost.`
 5. `Suggest follow-up actions for this doctor.`
 
+Optional voice-note demo:
+
+1. Click `Summarize from Voice Note (Requires Consent)`.
+2. Give consent.
+3. Speak or enter the transcript fallback.
+4. Confirm the form updates through the same AI flow.
+
+PostgreSQL verification query:
+
+```sql
+SELECT id, hcp_name, interaction_type, sentiment, created_at
+FROM interaction_records;
+```
+
+Reset local demo data before recording:
+
+```sql
+TRUNCATE TABLE sample_distributions, interaction_records RESTART IDENTITY CASCADE;
+```
+
 ## Important Implementation Note
 
 The main path uses **LangGraph + Groq LLM** exactly as requested.
 
 For developer convenience, a **demo fallback mode** is included when `GROQ_API_KEY` is missing, so the UI can still be shown during local build-out. In actual assessment/demo use, configure the Groq key so the real LLM path is active.
+
+The form fields are intentionally read-only. This follows the video instruction that the left form should not be filled manually and should be controlled by the AI assistant.
 
 ## Suggested Submission Story
 
