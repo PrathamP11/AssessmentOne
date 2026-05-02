@@ -4,13 +4,13 @@ const initialState = {
   formState: {
     hcp_name: "",
     interaction_type: "Meeting",
-    date: "19-04-2025",
-    time: "19:36",
+    date: "",
+    time: "",
     attendees: [],
     topics_discussed: "",
     materials_shared: [],
     samples_distributed: [],
-    sentiment: "neutral",
+    sentiment: "",
     outcomes: "",
     follow_up_actions: "",
     ai_suggested_follow_ups: [

@@ -92,6 +92,12 @@ def _merge_interaction(
                 setattr(state, key, merged)
         elif isinstance(value, str):
             if value.strip():
+                # Sentiment starts with a default value in the UI, so allow the
+                # extracted value to replace that placeholder during first-time logging.
+                if key == "sentiment" and value in {"positive", "neutral", "negative"}:
+                    if overwrite_existing or current_value in {"", "neutral"}:
+                        setattr(state, key, value)
+                    continue
                 if overwrite_existing or not str(current_value).strip():
                     setattr(state, key, value.strip())
         else:

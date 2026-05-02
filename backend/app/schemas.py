@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-Sentiment = Literal["positive", "neutral", "negative"]
+Sentiment = Literal["", "positive", "neutral", "negative"]
 
 
 class SampleItem(BaseModel):
