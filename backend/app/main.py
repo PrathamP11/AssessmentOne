@@ -68,3 +68,4 @@ def get_interactions(db: Session = Depends(get_db)):
         )
         for record in list_interactions(db)
     ]
+
